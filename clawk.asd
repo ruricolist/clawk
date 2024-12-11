@@ -4,7 +4,7 @@
   :maintainer "Zach Beane <xach@xach.com>"
   :author "Michael Parker <mparker762@hotmail.com>"
   :licence "BSD-style"
-  :depends-on (regex)
+  :depends-on ("regex" "parse-number")
   :components ((:file "packages")
                (:file "clawk" :depends-on ("packages"))
                (:file "clawktest" :depends-on ("packages" "clawk"))

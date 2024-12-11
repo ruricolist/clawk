@@ -269,7 +269,7 @@
 (defmethod int ((x (eql nil)))
   0)
 (defmethod int ((x string))
-  (let ((val (read (make-string-input-stream x) nil 0)))
+  (let ((val (parse-number:parse-number x)))
     (if (numberp val)
 	(round val)
 	0)))
