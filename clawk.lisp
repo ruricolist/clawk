@@ -484,7 +484,7 @@
 ;;;
 ;;; WITH-PATTERNS
 ;;;
-(defmacro with-patterns (pats &rest body)
+(defmacro with-patterns (pats &body body)
   "Execute the body in an environment that includes the compiled patterns
    bound to their respective variables."
   #+:Symbolics (declare (zwei:indentation 1 1))
@@ -510,7 +510,7 @@
 ;;; WITH-FIELDS
 ;;;
 ;;; Allows stuff like
-;;;   (with-fields ((a b c d &rest rest) str)
+;;;   (with-fields ((a b c d &body rest) str)
 ;;;     ($print "Fields:" a b c d "Rest: " rest))
 ;;;
 ;;; as well as the slightly more awk-ish
@@ -523,7 +523,7 @@
 ;;;     ($print "Fields:" $1 $2 $3 $4))
 ;;; which will split the current line into the $ vars.
 ;;;
-(defmacro with-fields ((&optional fields sourcestr (fieldsep-pattern '(FS))) &rest body)
+(defmacro with-fields ((&optional fields sourcestr (fieldsep-pattern '(FS))) &body body)
   "Split the source string into fields based on the field separator,
    bind the field array to the fields variable."
   #+:Symbolics (declare (zwei:indentation 1 1))
@@ -584,7 +584,7 @@
 ;;;
 ;;; which is handy in match-case clauses
 ;;;
-(defmacro with-submatches (&optional fields &rest body)
+(defmacro with-submatches (&optional fields &body body)
   "Bind the submatch variables to the corresponding strings from the registers array."
   #+:Symbolics (declare (zwei:indentation 1 1))
   (expand-with-submatches fields body))
@@ -618,7 +618,7 @@ otherwise evaluate the alternative."
 
 #-:Symbolics
 (progn
-  (defmacro once-only (variables &rest body)
+  (defmacro once-only (variables &body body)
     "Returns the code built by BODY.  If any of VARIABLES
 might have side effects, they are evaluated once and stored
 in temporary variables that are then passed to BODY."
@@ -661,7 +661,7 @@ or of the form (THE type x) where x is side-effect-free."
 ;;; WITH-MATCH
 ;;;
 ;;; Allows stuff like
-;;;   (with-match ((a b c d &rest rest) pat str)
+;;;   (with-match ((a b c d &body rest) pat str)
 ;;;     ($print "Regs:" a b c d "Rest: " rest))
 ;;;
 ;;; as well as the slightly less readable
@@ -674,7 +674,7 @@ or of the form (THE type x) where x is side-effect-free."
 ;;;     ($print "Fields:" %1 %2 %3 %4))
 ;;; which will split the current line into the % vars.
 
-(defmacro with-match ((&optional fields pat sourcestr) &rest body)
+(defmacro with-match ((&optional fields pat sourcestr) &body body)
   "Split the source string into registers based on the pattern,
    bind the register variables to the registers array."
  #+:Symbolics (declare (zwei:indentation 1 1))
@@ -740,7 +740,7 @@ or of the form (THE type x) where x is side-effect-free."
 ;;; The matches are done by MATCH, so the various special variables are set
 ;;; appropriately
 ;;;
-(defmacro match-case (strexpr &rest clauses)
+(defmacro match-case (strexpr &body clauses)
   #+:Symbolics (declare (zwei:indentation 1 1))
   (expand-match-case strexpr clauses))
 #+:Lispworks (editor:setup-indent "match-case" 1 2 6)
@@ -775,7 +775,7 @@ or of the form (THE type x) where x is side-effect-free."
 ;;; but just evaluates the clauses (BEGIN clause first, then pattern
 ;;; clauses, then END clause), without any looping.
 ;;;
-(defmacro match-when (&rest clauses)
+(defmacro match-when (&body clauses)
   #+:Symbolics (declare (zwei:indentation 1 1))
   (let ((docs-and-decs (extract-docs-and-decs clauses))
         (begin-clauses (extract-begin-clauses clauses))
@@ -868,7 +868,7 @@ or of the form (THE type x) where x is side-effect-free."
 ;;;
 (defmacro for-stream-lines ((stream &optional (strmvar (gensym))
                                               (linevar (gensym)))
-                                    &rest body)
+                                    &body body)
   #+:Symbolics (declare (zwei:indentation 1 1))
   (expand-for-stream-lines strmvar linevar stream body))
 #+:Lispworks (editor:setup-indent "for-stream-lines" 1 2 6)
@@ -908,7 +908,7 @@ or of the form (THE type x) where x is side-effect-free."
 ;;;
 (defmacro for-file-lines ((path &optional (streamvar (gensym))
                                           (linevar (gensym)))
-                                &rest body)
+                                &body body)
   #+:Symbolics (declare (zwei:indentation 1 1))
   (expand-for-file-lines streamvar linevar path body))
 #+:Lispworks (editor:setup-indent "for-file-lines" 1 2 6)
@@ -934,7 +934,7 @@ or of the form (THE type x) where x is side-effect-free."
 (defmacro for-stream-fields ((stream &optional fieldspec
                                               (strmvar (gensym))
                                               (linevar (gensym)))
-                                     &rest body)
+                                     &body body)
   #+:Symbolics (declare (zwei:indentation 1 1))
   (expand-for-stream-fields strmvar linevar fieldspec stream body))
 #+:Lispworks (editor:setup-indent "for-stream-fields" 1 2 6)
@@ -974,7 +974,7 @@ or of the form (THE type x) where x is side-effect-free."
 (defmacro for-file-fields ((path &optional fieldspec
                                           (strmvar (gensym))
                                           (linevar (gensym)))
-                                 &rest body)
+                                 &body body)
   #+:Symbolics (declare (zwei:indentation 1 1))
   (expand-for-file-fields strmvar linevar fieldspec path body))
 #+:Lispworks (editor:setup-indent "for-file-fields" 1 2 6)
@@ -995,7 +995,7 @@ or of the form (THE type x) where x is side-effect-free."
 ;;; Guts of AWK toplevel for a file, but unlike AWK this can be
 ;;; used anywhere.
 ;;;
-(defmacro when-stream-fields ((stream &optional fieldspec) &rest clauses)
+(defmacro when-stream-fields ((stream &optional fieldspec) &body clauses)
   #+:Symbolics (declare (zwei:indentation 1 1))
   (let ((docs-and-decs (extract-docs-and-decs clauses))
         (begin-clauses (extract-begin-clauses clauses))
@@ -1008,7 +1008,7 @@ or of the form (THE type x) where x is side-effect-free."
                      ,@(mapcan #'rest end-clauses)))))
 #+:Lispworks (editor:setup-indent "when-stream-fields" 1 2 6)
 
-(defmacro when-file-fields ((path &optional fieldspec) &rest clauses)
+(defmacro when-file-fields ((path &optional fieldspec) &body clauses)
   #+:Symbolics (declare (zwei:indentation 1 1))
   (let ((docs-and-decs (extract-docs-and-decs clauses))
         (begin-clauses (extract-begin-clauses clauses))
@@ -1032,7 +1032,7 @@ or of the form (THE type x) where x is side-effect-free."
 ;;; after the files are processed.
 ;;;
 
-(defmacro defawk (name (&rest parms) &rest clauses)
+(defmacro defawk (name (&rest parms) &body clauses)
   (let ((file-or-stream (gensym))
         (process-stream-fn (gensym))
         (strm (gensym))
@@ -1287,7 +1287,7 @@ or of the form (THE type x) where x is side-effect-free."
 				  other-indices)))))
 
 ; equivalent to:  for (x in a) ...
-(defmacro $for ((keyvar in tbl) &rest body)
+(defmacro $for ((keyvar in tbl) &body body)
   (declare (ignore in))
   #+:Symbolics (declare (zwei:indentation 1 1))
   `(loop for ,keyvar being the hash-keys of ,tbl
